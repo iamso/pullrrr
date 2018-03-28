@@ -1,5 +1,5 @@
 /*!
- * pullrrr - version 0.1.0
+ * pullrrr - version 0.2.0
  *
  * Made with ❤ by Steve Ottoz so@dev.so
  *
@@ -17,26 +17,6 @@ const defaults = {
   fade: false,
   maxWidth: false
 };
-
-const styles = `
-/**
-* Required Pullrrr Styles
-*/
-.pullrrr-container {
-  transition: 0.2s ease-out;
-}
-html.pullrrr-pulling-down .pullrrr-container,
-html.pullrrr-is-top .pullrrr-container {
-  touch-action: pan-x pan-down pinch-zoom;
-}
-html.pullrrr-pulling-up .pullrrr-container,
-html.pullrrr-is-bottom .pullrrr-container {
-  touch-action: pan-x pan-up pinch-zoom;
-}
-html.pullrrr-pulling-up .pullrrr-container,
-html.pullrrr-pulling-down .pullrrr-container {
-  transition: 0s;
-}`;
 
 const eventOptions = {
   passive: false
@@ -65,6 +45,40 @@ export default class Pullrrr {
     this.direction = null;
     this.executed = false;
     this.callbacks = {};
+
+    this.classContainer = `${this.options.prefix}-container`;
+    this.classPullTop = `${this.options.prefix}-pull-top`;
+    this.classPullBottom = `${this.options.prefix}-pull-bottom`;
+    this.classUseOver = `${this.options.prefix}-use-over`;
+    this.classOver = `${this.options.prefix}-over`;
+    this.classPulledDown = `${this.options.prefix}-pulled-down`;
+    this.classPulledUp = `${this.options.prefix}-pulled-up`;
+    this.classPullingDown = `${this.options.prefix}-pulling-down`;
+    this.classPullingUp = `${this.options.prefix}-pulling-up`;
+    this.classThreshold = `${this.options.prefix}-threshold`;
+    this.classIsTop = `${this.options.prefix}-is-top`;
+    this.classIsBottom = `${this.options.prefix}-is-bottom`;
+
+    this.styles = `
+    /**
+    * Required Pullrrr Styles
+    */
+    .${this.options.prefix}-container {
+      transition: 0.2s ease-out;
+    }
+    html.${this.options.prefix}-pulling-down .${this.options.prefix}-container,
+    html.${this.options.prefix}-is-top .${this.options.prefix}-container {
+      touch-action: pan-x pan-down pinch-zoom;
+    }
+    html.${this.options.prefix}-pulling-up .${this.options.prefix}-container,
+    html.${this.options.prefix}-is-bottom .${this.options.prefix}-container {
+      touch-action: pan-x pan-up pinch-zoom;
+    }
+    html.${this.options.prefix}-pulling-up .${this.options.prefix}-container,
+    html.${this.options.prefix}-pulling-down .${this.options.prefix}-container {
+      transition: 0s;
+    }`;
+
     this.init();
   }
 
@@ -74,11 +88,11 @@ export default class Pullrrr {
     if (this.options.maxWidth && !isNaN(this.options.maxWidth)) {
       this.style.textContent = `
         @media (max-width: ${this.options.maxWidth}px) {
-          ${styles}
+          ${this.styles}
         }
       `;
     } else {
-      this.style.textContent = styles;
+      this.style.textContent = this.styles;
     }
     head.appendChild(this.style);
 
@@ -90,16 +104,19 @@ export default class Pullrrr {
       this.container = body;
     }
 
-    this.container.classList.add(`${this.options.prefix}-container`);
+    this.container.classList.add(this.classContainer);
 
     if (this.options.pullTop instanceof Node) {
       this.pullTop = this.options.pullTop;
     } else if (typeof this.options.pullTop === 'string') {
       this.pullTop = document.querySelector(this.options.pullTop);
     } else {
-      this.pullTop = document.createElement('div');
-      this.pullTop.classList.add(`${this.options.prefix}-pull-top`);
-      this.container.appendChild(this.pullTop);
+      this.pullTop = document.querySelector(`.${this.classPullTop}`);
+      if (!this.pullTop) {
+        this.pullTop = document.createElement('div');
+        this.pullTop.classList.add(this.classPullTop);
+        this.container.appendChild(this.pullTop);
+      }
     }
 
     if (this.options.pullBottom instanceof Node) {
@@ -107,15 +124,18 @@ export default class Pullrrr {
     } else if (typeof this.options.pullBottom === 'string') {
       this.pullBottom = document.querySelector(this.options.pullBottom);
     } else {
-      this.pullBottom = document.createElement('div');
-      this.pullBottom.classList.add(`${this.options.prefix}-pull-bottom`);
-      this.container.appendChild(this.pullBottom);
+      this.pullBottom = document.querySelector(`.${this.classPullBottom}`);
+      if (!this.pullBottom) {
+        this.pullBottom = document.createElement('div');
+        this.pullBottom.classList.add(this.classPullBottom);
+        this.container.appendChild(this.pullBottom);
+      }
     }
 
     if (this.options.over) {
-      html.classList.add(`${this.options.prefix}-use-over`);
-      this.pullTop.classList.add(`${this.options.prefix}-over`);
-      this.pullBottom.classList.add(`${this.options.prefix}-over`);
+      html.classList.add(this.classUseOver);
+      this.pullTop.classList.add(this.classOver);
+      this.pullBottom.classList.add(this.classOver);
     }
 
     this.handlers = {
@@ -192,8 +212,8 @@ export default class Pullrrr {
       return;
     }
     if (this.canPull) {
-      html.classList.remove(`${this.options.prefix}-pulled-up`);
-      html.classList.remove(`${this.options.prefix}-pulled-down`);
+      html.classList.remove(this.classPulledUp);
+      html.classList.remove(this.classPulledDown);
       this.dragging = true;
       this.startY = e.touches[0].pageY;
     }
@@ -226,12 +246,12 @@ export default class Pullrrr {
 
       if (this.direction) {
         e.preventDefault();
-        html.classList.add(`${this.options.prefix}-pulling-${this.direction}`);
+        html.classList.add(this.direction === 'down' ? this.classPullingDown : this.classPullingUp);
         el.style.height = `${this.abs}px`;
         this.options.fade && (el.style.opacity = this.abs / this.options.threshold);
         this.options.over || (this.container.style.transform = `translateY(${this.distance}px)`);
         if (this.abs >= this.options.threshold) {
-          el.classList.add(`${this.options.prefix}-threshold`);
+          el.classList.add(this.classThreshold);
           if (!this.executed) {
             if (Array.isArray(this.callbacks.threshold)) {
               for (let fn of this.callbacks.threshold) {
@@ -241,7 +261,7 @@ export default class Pullrrr {
             this.executed = true;
           }
         } else {
-          el.classList.remove(`${this.options.prefix}-threshold`);
+          el.classList.remove(this.classThreshold);
         }
         if (Array.isArray(this.callbacks.pulling)) {
           for (let fn of this.callbacks.pulling) {
@@ -258,17 +278,17 @@ export default class Pullrrr {
     }
     this.dragging = false;
     this.executed = false;
-    html.classList.remove(`${this.options.prefix}-pulling-up`);
-    html.classList.remove(`${this.options.prefix}-pulling-down`);
+    html.classList.remove(this.classPullingUp);
+    html.classList.remove(this.classPullingDown);
     this.container.style.transform = '';
-    this.pullTop.classList.remove(`${this.options.prefix}-threshold`);
+    this.pullTop.classList.remove(this.classThreshold);
     this.pullTop.style.height = '';
     this.pullTop.style.opacity = '';
-    this.pullBottom.classList.remove(`${this.options.prefix}-threshold`);
+    this.pullBottom.classList.remove(this.classThreshold);
     this.pullBottom.style.height = '';
     this.pullBottom.style.opacity = '';
     if (this.abs >= this.options.threshold) {
-      html.classList.add(`${this.options.prefix}-pulled-${this.direction}`);
+      html.classList.add(this.direction === 'down' ? this.classPulledDown : this.classPulledUp);
       if (Array.isArray(this.callbacks.pulled)) {
         for (let fn of this.callbacks.pulled) {
           /^f/.test(typeof fn) && fn.apply(this, [this.direction, this.abs >= this.options.threshold, this]);
@@ -283,14 +303,14 @@ export default class Pullrrr {
       return;
     }
     if (can === 'down') {
-      html.classList.add(`${this.options.prefix}-is-top`);
-      html.classList.remove(`${this.options.prefix}-is-bottom`);
+      html.classList.add(this.classIsTop);
+      html.classList.remove(this.classIsBottom);
     } else if (can === 'up') {
-      html.classList.add(`${this.options.prefix}-is-bottom`);
-      html.classList.remove(`${this.options.prefix}-is-top`);
+      html.classList.add(this.classIsBottom);
+      html.classList.remove(this.classIsTop);
     } else {
-      html.classList.remove(`${this.options.prefix}-is-top`);
-      html.classList.remove(`${this.options.prefix}-is-bottom`);
+      html.classList.remove(this.classIsTop);
+      html.classList.remove(this.classIsBottom);
     }
   }
 
