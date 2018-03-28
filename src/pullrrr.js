@@ -11,26 +11,6 @@ const defaults = {
   maxWidth: false,
 };
 
-const styles = `
-/**
-* Required Pullrrr Styles
-*/
-.pullrrr-container {
-  transition: 0.2s ease-out;
-}
-html.pullrrr-pulling-down .pullrrr-container,
-html.pullrrr-is-top .pullrrr-container {
-  touch-action: pan-x pan-down pinch-zoom;
-}
-html.pullrrr-pulling-up .pullrrr-container,
-html.pullrrr-is-bottom .pullrrr-container {
-  touch-action: pan-x pan-up pinch-zoom;
-}
-html.pullrrr-pulling-up .pullrrr-container,
-html.pullrrr-pulling-down .pullrrr-container {
-  transition: 0s;
-}`;
-
 const eventOptions = {
   passive: false,
 };
@@ -73,6 +53,26 @@ export default class Pullrrr {
     this.classIsTop = `${this.options.prefix}-is-top`;
     this.classIsBottom = `${this.options.prefix}-is-bottom`;
 
+    this.styles = `
+    /**
+    * Required Pullrrr Styles
+    */
+    .${this.options.prefix}-container {
+      transition: 0.2s ease-out;
+    }
+    html.${this.options.prefix}-pulling-down .${this.options.prefix}-container,
+    html.${this.options.prefix}-is-top .${this.options.prefix}-container {
+      touch-action: pan-x pan-down pinch-zoom;
+    }
+    html.${this.options.prefix}-pulling-up .${this.options.prefix}-container,
+    html.${this.options.prefix}-is-bottom .${this.options.prefix}-container {
+      touch-action: pan-x pan-up pinch-zoom;
+    }
+    html.${this.options.prefix}-pulling-up .${this.options.prefix}-container,
+    html.${this.options.prefix}-pulling-down .${this.options.prefix}-container {
+      transition: 0s;
+    }`;
+
     this.init();
   }
 
@@ -82,12 +82,12 @@ export default class Pullrrr {
     if (this.options.maxWidth && !isNaN(this.options.maxWidth)) {
       this.style.textContent = `
         @media (max-width: ${this.options.maxWidth}px) {
-          ${styles}
+          ${this.styles}
         }
       `;
     }
     else {
-      this.style.textContent = styles;
+      this.style.textContent = this.styles;
     }
     head.appendChild(this.style);
 
