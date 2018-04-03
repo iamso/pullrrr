@@ -1,5 +1,5 @@
 /*!
- * pullrrr - version 0.2.0
+ * pullrrr - version 0.3.0
  *
  * Made with ❤ by Steve Ottoz so@dev.so
  *
@@ -64,7 +64,9 @@
     prefix: 'pullrrr',
     over: false,
     fade: false,
-    maxWidth: false
+    maxWidth: false,
+    top: true,
+    bottom: true
   };
 
   var eventOptions = {
@@ -111,7 +113,7 @@
       this.classIsTop = this.options.prefix + '-is-top';
       this.classIsBottom = this.options.prefix + '-is-bottom';
 
-      this.styles = '\n    /**\n    * Required Pullrrr Styles\n    */\n    .' + this.options.prefix + '-container {\n      transition: 0.2s ease-out;\n    }\n    html.' + this.options.prefix + '-pulling-down .' + this.options.prefix + '-container,\n    html.' + this.options.prefix + '-is-top .' + this.options.prefix + '-container {\n      touch-action: pan-x pan-down pinch-zoom;\n    }\n    html.' + this.options.prefix + '-pulling-up .' + this.options.prefix + '-container,\n    html.' + this.options.prefix + '-is-bottom .' + this.options.prefix + '-container {\n      touch-action: pan-x pan-up pinch-zoom;\n    }\n    html.' + this.options.prefix + '-pulling-up .' + this.options.prefix + '-container,\n    html.' + this.options.prefix + '-pulling-down .' + this.options.prefix + '-container {\n      transition: 0s;\n    }';
+      this.styles = '\n    /**\n    * Required Pullrrr Styles\n    */\n    .' + this.options.prefix + '-container {\n      transition: 0.2s ease-out;\n    }\n    ' + (this.options.top ? '\n    html.' + this.options.prefix + '-pulling-down .' + this.options.prefix + '-container,\n    html.' + this.options.prefix + '-is-top .' + this.options.prefix + '-container {\n      touch-action: pan-x pan-down pinch-zoom;\n    }\n    ' : '') + '\n    ' + (this.options.bottom ? '\n    html.' + this.options.prefix + '-pulling-up .' + this.options.prefix + '-container,\n    html.' + this.options.prefix + '-is-bottom .' + this.options.prefix + '-container {\n      touch-action: pan-x pan-up pinch-zoom;\n    }\n    ' : '') + '\n    html.' + this.options.prefix + '-pulling-up .' + this.options.prefix + '-container,\n    html.' + this.options.prefix + '-pulling-down .' + this.options.prefix + '-container {\n      transition: 0s;\n    }';
 
       this.init();
     }
@@ -119,75 +121,81 @@
     _createClass(Pullrrr, [{
       key: 'init',
       value: function init() {
-        this.style = document.createElement('style');
-        this.style.id = this.options.prefix + '-styles';
-        if (this.options.maxWidth && !isNaN(this.options.maxWidth)) {
-          this.style.textContent = '\n        @media (max-width: ' + this.options.maxWidth + 'px) {\n          ' + this.styles + '\n        }\n      ';
-        } else {
-          this.style.textContent = this.styles;
-        }
-        head.appendChild(this.style);
-
-        if (this.options.container instanceof Node) {
-          this.container = this.options.container;
-        } else if (typeof this.options.container === 'string') {
-          this.container = document.querySelector(this.options.container);
-        } else {
-          this.container = body;
-        }
-
-        this.container.classList.add(this.classContainer);
-
-        if (this.options.pullTop instanceof Node) {
-          this.pullTop = this.options.pullTop;
-        } else if (typeof this.options.pullTop === 'string') {
-          this.pullTop = document.querySelector(this.options.pullTop);
-        } else {
-          this.pullTop = document.querySelector('.' + this.classPullTop);
-          if (!this.pullTop) {
-            this.pullTop = document.createElement('div');
-            this.pullTop.classList.add(this.classPullTop);
-            this.container.appendChild(this.pullTop);
+        if (this.options.top || this.options.bottom) {
+          this.style = document.createElement('style');
+          this.style.id = this.options.prefix + '-styles';
+          if (this.options.maxWidth && !isNaN(this.options.maxWidth)) {
+            this.style.textContent = '\n        @media (max-width: ' + this.options.maxWidth + 'px) {\n          ' + this.styles + '\n        }\n        ';
+          } else {
+            this.style.textContent = this.styles;
           }
-        }
+          head.appendChild(this.style);
 
-        if (this.options.pullBottom instanceof Node) {
-          this.pullBottom = this.options.pullBottom;
-        } else if (typeof this.options.pullBottom === 'string') {
-          this.pullBottom = document.querySelector(this.options.pullBottom);
-        } else {
-          this.pullBottom = document.querySelector('.' + this.classPullBottom);
-          if (!this.pullBottom) {
-            this.pullBottom = document.createElement('div');
-            this.pullBottom.classList.add(this.classPullBottom);
-            this.container.appendChild(this.pullBottom);
+          if (this.options.container instanceof Node) {
+            this.container = this.options.container;
+          } else if (typeof this.options.container === 'string') {
+            this.container = document.querySelector(this.options.container);
+          } else {
+            this.container = body;
           }
+
+          this.container.classList.add(this.classContainer);
+
+          if (this.options.top) {
+            if (this.options.pullTop instanceof Node) {
+              this.pullTop = this.options.pullTop;
+            } else if (typeof this.options.pullTop === 'string') {
+              this.pullTop = document.querySelector(this.options.pullTop);
+            } else {
+              this.pullTop = document.querySelector('.' + this.classPullTop);
+              if (!this.pullTop) {
+                this.pullTop = document.createElement('div');
+                this.pullTop.classList.add(this.classPullTop);
+                this.container.appendChild(this.pullTop);
+              }
+            }
+          }
+
+          if (this.options.bottom) {
+            if (this.options.pullBottom instanceof Node) {
+              this.pullBottom = this.options.pullBottom;
+            } else if (typeof this.options.pullBottom === 'string') {
+              this.pullBottom = document.querySelector(this.options.pullBottom);
+            } else {
+              this.pullBottom = document.querySelector('.' + this.classPullBottom);
+              if (!this.pullBottom) {
+                this.pullBottom = document.createElement('div');
+                this.pullBottom.classList.add(this.classPullBottom);
+                this.container.appendChild(this.pullBottom);
+              }
+            }
+          }
+
+          if (this.options.over) {
+            html.classList.add(this.classUseOver);
+            this.options.top && this.pullTop.classList.add(this.classOver);
+            this.options.bottom && this.pullBottom.classList.add(this.classOver);
+          }
+
+          this.handlers = {
+            touchstart: this.touchstart.bind(this),
+            touchmove: this.touchmove.bind(this),
+            touchend: this.touchend.bind(this),
+            scroll: this.scroll.bind(this)
+          };
+
+          window.addEventListener('touchstart', this.handlers.touchstart);
+          window.addEventListener('touchmove', this.handlers.touchmove, supportsPassive ? eventOptions : false);
+          window.addEventListener('touchend', this.handlers.touchend);
+          window.addEventListener('resize', this.handlers.scroll);
+          if (this.container === body || this.container === html) {
+            window.addEventListener('scroll', this.handlers.scroll);
+          } else {
+            this.container.addEventListener('scroll', this.handlers.scroll);
+          }
+
+          this.scroll();
         }
-
-        if (this.options.over) {
-          html.classList.add(this.classUseOver);
-          this.pullTop.classList.add(this.classOver);
-          this.pullBottom.classList.add(this.classOver);
-        }
-
-        this.handlers = {
-          touchstart: this.touchstart.bind(this),
-          touchmove: this.touchmove.bind(this),
-          touchend: this.touchend.bind(this),
-          scroll: this.scroll.bind(this)
-        };
-
-        window.addEventListener('touchstart', this.handlers.touchstart);
-        window.addEventListener('touchmove', this.handlers.touchmove, supportsPassive ? eventOptions : false);
-        window.addEventListener('touchend', this.handlers.touchend);
-        window.addEventListener('resize', this.handlers.scroll);
-        if (this.container === body || this.container === html) {
-          window.addEventListener('scroll', this.handlers.scroll);
-        } else {
-          this.container.addEventListener('scroll', this.handlers.scroll);
-        }
-
-        this.scroll();
 
         return this;
       }
@@ -246,17 +254,17 @@
             this.distance = 0 - this.distance;
           }
 
-          if ((this.direction === 'down' || this.direction === 'both') && pixels > 0) {
+          if (this.options.top && (this.direction === 'down' || this.direction === 'both') && pixels > 0) {
             this.direction = 'down';
             el = this.pullTop;
-          } else if ((this.direction === 'up' || this.direction === 'both') && pixels < 0) {
+          } else if (this.options.bottom && (this.direction === 'up' || this.direction === 'both') && pixels < 0) {
             this.direction = 'up';
             el = this.pullBottom;
           } else {
             this.direction = false;
           }
 
-          if (this.direction) {
+          if (el && this.direction) {
             e.preventDefault();
             html.classList.add(this.direction === 'down' ? this.classPullingDown : this.classPullingUp);
             el.style.height = this.abs + 'px';
@@ -336,15 +344,23 @@
         html.classList.remove(this.classPullingUp);
         html.classList.remove(this.classPullingDown);
         this.container.style.transform = '';
-        this.pullTop.classList.remove(this.classThreshold);
-        this.pullTop.style.height = '';
-        this.pullTop.style.opacity = '';
-        this.pullBottom.classList.remove(this.classThreshold);
-        this.pullBottom.style.height = '';
-        this.pullBottom.style.opacity = '';
+        if (this.options.top) {
+          this.pullTop.classList.remove(this.classThreshold);
+          this.pullTop.style.height = '';
+          this.pullTop.style.opacity = '';
+        }
+        if (this.options.bottom) {
+          this.pullBottom.classList.remove(this.classThreshold);
+          this.pullBottom.style.height = '';
+          this.pullBottom.style.opacity = '';
+        }
         if (this.abs >= this.options.threshold) {
-          html.classList.add(this.direction === 'down' ? this.classPulledDown : this.classPulledUp);
-          if (Array.isArray(this.callbacks.pulled)) {
+          if (this.direction === 'down' && this.options.top) {
+            html.classList.add(this.classPulledDown);
+          } else if (this.direction === 'up' && this.options.bottom) {
+            html.classList.add(this.classPulledUp);
+          }
+          if (Array.isArray(this.callbacks.pulled) && (this.direction === 'down' && this.options.top || this.direction === 'up' && this.options.bottom)) {
             var _iteratorNormalCompletion3 = true;
             var _didIteratorError3 = false;
             var _iteratorError3 = undefined;
