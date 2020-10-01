@@ -5,14 +5,6 @@ Pull to do something...
 Install
 -------
 
-### With Bower
-
-```bash
-bower install pullrrr
-```
-
-### With NPM
-
 ```bash
 npm install pullrrr
 ```
